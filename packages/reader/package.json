@@ -1,0 +1,39 @@
+{
+  "name": "@physmark/reader",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./style.css": "./src/style.css"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@physmark/core": "workspace:*",
+    "@physmark/fs-adapter": "workspace:*",
+    "@physmark/theme": "workspace:*",
+    "highlight.js": "^11.11.1",
+    "katex": "^0.16.45",
+    "marked": "^18.0.2",
+    "marked-highlight": "^2.2.4",
+    "marked-katex-extension": "^5.1.8",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.10"
+  }
+}

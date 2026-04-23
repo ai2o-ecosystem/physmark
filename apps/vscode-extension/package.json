@@ -1,0 +1,65 @@
+{
+  "name": "physmark-vscode",
+  "displayName": "PhysMark",
+  "description": "Interactive physics simulations in Markdown",
+  "version": "0.1.0",
+  "publisher": "physmark",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "physmark.editor",
+        "displayName": "PhysMark",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
+    "commands": [
+      {
+        "command": "physmark.openEditor",
+        "title": "Open with PhysMark",
+        "category": "PhysMark"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "physmark.openEditor",
+          "when": "resourceExtname == .md",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.extension.json && vite build --config vite.webview.config.ts",
+    "watch": "tsc -p tsconfig.extension.json --watch"
+  },
+  "dependencies": {
+    "@physmark/core": "workspace:*",
+    "@physmark/fs-adapter": "workspace:*",
+    "@physmark/plugin-rapier": "workspace:*",
+    "@physmark/reader": "workspace:*",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/vscode": "^1.85.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.10"
+  }
+}

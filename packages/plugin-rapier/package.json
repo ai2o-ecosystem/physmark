@@ -1,0 +1,37 @@
+{
+  "name": "@physmark/plugin-rapier",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.13.0",
+    "@physmark/core": "workspace:*",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.0",
+    "js-yaml": "^4.1.1",
+    "three": "^0.163.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.163.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.10"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}
