@@ -65,8 +65,8 @@ export const Physics3DRenderer: React.FC<{ config: Physics3DConfig }> = ({ confi
 
 const PhysicsWorld: React.FC<{ config: Physics3DConfig }> = ({ config }) => {
   const [ready, setReady] = React.useState(false);
+  const [rev, setRev] = React.useState(0);
   const startTime = useRef(Date.now());
-  const rev = useRef(0);
 
   React.useEffect(() => {
     import('@dimforge/rapier3d-compat').then(RAPIER =>
@@ -76,7 +76,7 @@ const PhysicsWorld: React.FC<{ config: Physics3DConfig }> = ({ config }) => {
 
   const onReset = () => {
     startTime.current = Date.now();
-    rev.current += 1;
+    setRev(r => r + 1);
   };
 
   const { worldRef, bodiesRef, buildWorld } = usePhysicsWorld(
@@ -85,22 +85,22 @@ const PhysicsWorld: React.FC<{ config: Physics3DConfig }> = ({ config }) => {
     ready
   );
 
-  if (!ready) return null;
-
   usePhysicsStep(worldRef);
 
   useFrame(() => {
+    if (!ready) return;
     const elapsed = (Date.now() - startTime.current) / 1000;
-    const duration = config.duration ?? 10;
-    if (elapsed > duration && config.loop) {
+    if (elapsed > (config.duration ?? 10) && config.loop) {
       buildWorld();
     }
   });
 
+  if (!ready) return null;
+
   return (
     <>
       {bodiesRef.current.map((b, i) => (
-        <PhysicsBody key={`${rev.current}-${i}`} body={b.rigidBody} config={b.config} />
+        <PhysicsBody key={`${rev}-${i}`} body={b.rigidBody} config={b.config} />
       ))}
     </>
   );
