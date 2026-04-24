@@ -9,6 +9,11 @@ interface ToolbarProps {
   sidebarVisible: boolean;
   onSidebarToggle: () => void;
   hasAdapter: boolean;
+  editMode?: boolean;
+  onEditModeToggle?: () => void;
+  dirty?: boolean;
+  onSave?: () => void;
+  canSave?: boolean;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -19,6 +24,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   sidebarVisible,
   onSidebarToggle,
   hasAdapter,
+  editMode,
+  onEditModeToggle,
+  dirty,
+  onSave,
+  canSave,
 }) => (
   <div className="physmark-toolbar">
     <button onClick={onSidebarToggle} title="Toggle sidebar">
@@ -29,6 +39,24 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <button onClick={onOpenFile} title="Open file">Open File</button>
         <button onClick={onOpenDirectory} title="Open directory">Open Directory</button>
       </>
+    )}
+    <div className="physmark-toolbar-sep" />
+    <button
+      onClick={onEditModeToggle}
+      className={editMode ? 'pm-toolbar-btn-active' : ''}
+      title={editMode ? 'Switch to preview' : 'Switch to edit mode'}
+    >
+      {editMode ? '👁 Preview' : '✏ Edit'}
+    </button>
+    {editMode && canSave && (
+      <button
+        onClick={onSave}
+        className={dirty ? 'pm-toolbar-btn-dirty' : ''}
+        disabled={!dirty}
+        title="Save file"
+      >
+        {dirty ? '● Save' : 'Saved'}
+      </button>
     )}
     <div style={{ flex: 1 }} />
     <button onClick={onThemeToggle} title="Toggle theme">

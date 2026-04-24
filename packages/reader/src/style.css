@@ -273,3 +273,135 @@
   color: var(--pm-color-text-muted, #6b7280);
   font-size: 14px;
 }
+
+/* ── Toolbar extras ─────────────────────────────────────────────────────── */
+
+.physmark-toolbar-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--pm-color-border, #e5e5e5);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+.pm-toolbar-btn-active {
+  background: var(--pm-color-accent, #3b82f6) !important;
+  color: #fff !important;
+  border-color: var(--pm-color-accent, #3b82f6) !important;
+}
+
+.pm-toolbar-btn-dirty {
+  background: #f59e0b !important;
+  color: #fff !important;
+  border-color: #f59e0b !important;
+}
+
+.physmark-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Editor root ────────────────────────────────────────────────────────── */
+
+.pm-editor-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Editor toolbar (markdown insertion buttons) ────────────────────────── */
+
+.pm-editor-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px 10px;
+  background: var(--pm-color-surface, #f3f3f3);
+  border-bottom: 1px solid var(--pm-color-border, #e5e5e5);
+  flex-shrink: 0;
+}
+
+.pm-editor-toolbar-btn {
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--pm-color-text, #2d2a2a);
+  font-size: 12px;
+  font-family: var(--pm-font-family-mono, ui-monospace, monospace);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.pm-editor-toolbar-btn:hover {
+  background: var(--pm-color-accent, #3b82f6);
+  color: #fff;
+  border-color: var(--pm-color-accent, #3b82f6);
+}
+
+.pm-editor-toolbar-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--pm-color-border, #e5e5e5);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* ── Split panes ────────────────────────────────────────────────────────── */
+
+.pm-editor-panes {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.pm-editor-source-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.pm-editor-split-divider {
+  width: 1px;
+  background: var(--pm-color-border, #e5e5e5);
+  flex-shrink: 0;
+}
+
+.pm-editor-preview-pane {
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+  border-left: none;
+}
+
+/* ── Textarea ───────────────────────────────────────────────────────────── */
+
+.pm-editor-textarea {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  resize: none;
+  border: none;
+  outline: none;
+  padding: 24px 28px;
+  box-sizing: border-box;
+  font-family: var(--pm-font-family-mono, ui-monospace, 'Cascadia Code', 'Fira Code', monospace);
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--pm-color-text, #2d2a2a);
+  background: var(--pm-color-background, #ffffff);
+  tab-size: 2;
+  white-space: pre;
+  overflow: auto;
+}
+
+.pm-editor-textarea::selection {
+  background: rgba(59, 130, 246, 0.2);
+}
+
