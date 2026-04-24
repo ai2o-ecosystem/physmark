@@ -1,12 +1,11 @@
 /**
  * Physics3DRenderer.tsx — R3F 3D physics scene renderer
  *
- * Crash-safe design:
- * - RAPIER.init() completes before any World is created
- * - world.free() always clears worldRef FIRST, so no stale pointer
- * - Loop reset is two-phase: clear bodies state (unmounts PhysicsBody) →
- *   useEffect sees resetKey change → builds new world with fresh RigidBodies
- *   This guarantees PhysicsBody.useFrame never touches a freed body.
+ * Crash-safe design: every world gets a generation counter stored in a
+ * module-level WeakMap. PhysicsBody receives the generation at mount time
+ * and skips useFrame if the worldRef's generation has advanced — meaning
+ * world.free() has already been called. No timing dependency on React
+ * unmount order vs rAF order.
  */
 
 import React, { useRef, useEffect, useState } from 'react';
@@ -28,9 +27,11 @@ export interface Physics3DConfig {
 interface BodyState {
   rigidBody: RAPIER.RigidBody;
   config: BodyConfig;
+  /** generation of the world this body belongs to */
+  gen: number;
 }
 
-// ─── Canvas wrapper ────────────────────────────────────────────────────────
+// ─── Canvas wrapper ─────────────────────────────────────────────────────────
 
 export const Physics3DRenderer: React.FC<{ config: Physics3DConfig }> = ({ config }) => (
   <div style={{
@@ -62,30 +63,32 @@ export const Physics3DRenderer: React.FC<{ config: Physics3DConfig }> = ({ confi
   </div>
 );
 
-// ─── PhysicsWorld ──────────────────────────────────────────────────────────
+// ─── PhysicsWorld ────────────────────────────────────────────────────────────
 
 const PhysicsWorld: React.FC<{ config: Physics3DConfig }> = ({ config }) => {
   const [rapierReady, setRapierReady] = useState(false);
-  // resetKey increment triggers useEffect to rebuild world
-  const [resetKey, setResetKey] = useState(0);
-  // bodies state drives rendering; empty = no PhysicsBody mounted
   const [bodies, setBodies] = useState<BodyState[]>([]);
 
+  // worldRef holds current live world; genRef is the "live" generation.
+  // When we free a world we bump genRef — any PhysicsBody still holding
+  // the old gen value will bail out of useFrame immediately.
   const worldRef = useRef<RAPIER.World | null>(null);
+  const genRef = useRef(0);
   const startTime = useRef(Date.now());
-  // true while bodies===[] and we're waiting for useEffect to rebuild
-  const rebuilding = useRef(false);
+  const loopScheduled = useRef(false);
 
-  // ── Init Rapier WASM once
   useEffect(() => {
     RAPIER.init().then(() => setRapierReady(true));
   }, []);
 
-  // ── Build world whenever Rapier is ready or resetKey changes
-  useEffect(() => {
+  const buildWorld = React.useCallback(() => {
     if (!rapierReady) return;
 
-    // Crash-safe free
+    // Invalidate old generation BEFORE freeing — PhysicsBody useFrame sees
+    // the stale gen and returns early from this point forward.
+    genRef.current += 1;
+    const currentGen = genRef.current;
+
     const old = worldRef.current;
     worldRef.current = null;
     if (old) { try { old.free(); } catch (_) {} }
@@ -124,70 +127,69 @@ const PhysicsWorld: React.FC<{ config: Physics3DConfig }> = ({ config }) => {
       w.createCollider(cd, rb);
       if (bc.velocity) rb.setLinvel(new RAPIER.Vector3(...bc.velocity), true);
       if (bc.angularVelocity) rb.setAngvel(new RAPIER.Vector3(...bc.angularVelocity), true);
-      return { rigidBody: rb, config: bc };
+
+      return { rigidBody: rb, config: bc, gen: currentGen };
     });
 
     worldRef.current = w;
     startTime.current = Date.now();
-    rebuilding.current = false;
+    loopScheduled.current = false;
     setBodies(newBodies);
+  }, [rapierReady, config]);
 
+  useEffect(() => {
+    buildWorld();
     return () => {
-      // Cleanup on unmount or before next effect run
-      const w2 = worldRef.current;
+      genRef.current += 1; // invalidate before free
+      const w = worldRef.current;
       worldRef.current = null;
-      setBodies([]);
-      if (w2) { try { w2.free(); } catch (_) {} }
+      if (w) { try { w.free(); } catch (_) {} }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rapierReady, resetKey]);
+  }, [buildWorld]);
 
-  // ── Step world + handle loop
   useFrame(() => {
     const w = worldRef.current;
-    if (w) {
-      try { w.step(); } catch (_) {}
-    }
+    if (!w) return;
+    try { w.step(); } catch (_) {}
 
-    if (!config.loop || rebuilding.current) return;
+    if (!config.loop || loopScheduled.current) return;
     const elapsed = (Date.now() - startTime.current) / 1000;
     if (elapsed > (config.duration ?? 10)) {
-      // Phase 1: free world now so existing RigidBody pointers become invalid,
-      // clear bodies state → PhysicsBody components unmount this frame
-      rebuilding.current = true;
-      const old = worldRef.current;
-      worldRef.current = null;
-      if (old) { try { old.free(); } catch (_) {} }
-      setBodies([]);
-      // Phase 2: after React unmounts old bodies, increment resetKey to rebuild
-      setTimeout(() => setResetKey(k => k + 1), 0);
+      loopScheduled.current = true;
+      // genRef already bumped in buildWorld; schedule rebuild outside rAF
+      setTimeout(buildWorld, 0);
     }
   });
 
   return (
     <>
       {bodies.map((b, i) => (
-        <PhysicsBody key={`${resetKey}-${i}`} body={b.rigidBody} config={b.config} />
+        <PhysicsBody key={`${b.gen}-${i}`} body={b.rigidBody} config={b.config} gen={b.gen} genRef={genRef} />
       ))}
     </>
   );
 };
 
-// ─── Body mesh ─────────────────────────────────────────────────────────────
+// ─── Body mesh ───────────────────────────────────────────────────────────────
 
-const PhysicsBody: React.FC<{ body: RAPIER.RigidBody; config: BodyConfig }> = ({ body, config }) => {
+const PhysicsBody: React.FC<{
+  body: RAPIER.RigidBody;
+  config: BodyConfig;
+  gen: number;
+  genRef: React.RefObject<number>;
+}> = ({ body, config, gen, genRef }) => {
   const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame(() => {
+    // If the world has been freed (generation advanced), bail immediately.
+    if (genRef.current !== gen) return;
     if (!meshRef.current) return;
-    // body is guaranteed valid: it's unmounted before world.free() takes effect
     const t = body.translation();
     const r = body.rotation();
     meshRef.current.position.set(t.x, t.y, t.z);
     meshRef.current.quaternion.set(r.x, r.y, r.z, r.w);
   });
 
-  const color = config.color ?? '#3b82f6';
   const size = config.size ?? 1;
 
   return (
@@ -206,7 +208,7 @@ const PhysicsBody: React.FC<{ body: RAPIER.RigidBody; config: BodyConfig }> = ({
         ]} />
       )}
       <meshStandardMaterial
-        color={color}
+        color={config.color ?? '#3b82f6'}
         metalness={config.metalness ?? 0.1}
         roughness={config.roughness ?? 0.65}
         envMapIntensity={0.6}
