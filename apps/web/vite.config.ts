@@ -27,6 +27,8 @@ export default defineConfig({
     }),
   ],
   resolve: {
+    // Force all packages to share the same React instance
+    dedupe: ['react', 'react-dom', 'three', '@react-three/fiber', '@react-three/drei'],
     alias: {
       '@physmark/core': new URL('../../packages/core/src/index.ts', import.meta.url).pathname,
       '@physmark/theme': new URL('../../packages/theme/src/index.ts', import.meta.url).pathname,
