@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { AIGenerateDialog } from './AIGenerateDialog';
 
 export interface InsertCommand {
   label: string;
@@ -86,6 +87,8 @@ export function insertAtCursor(
 }
 
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({ textareaRef, onChange }) => {
+  const [showAIDialog, setShowAIDialog] = useState(false);
+
   const handleCommand = (cmd: InsertCommand) => {
     const textarea = textareaRef.current;
     if (!textarea || cmd.prefix === '') return;
@@ -93,27 +96,63 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ textareaRef, onCha
     onChange(newValue);
   };
 
+  const handleAIGenerate = (code: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const { selectionStart: start, value } = textarea;
+    const beforeCursor = value.slice(0, start);
+    const needsNewlineBefore = beforeCursor.length > 0 && !beforeCursor.endsWith('\n');
+    const insertion = (needsNewlineBefore ? '\n\n' : '') + code + '\n\n';
+
+    const newValue = value.slice(0, start) + insertion + value.slice(start);
+    onChange(newValue);
+
+    // Move cursor to end of inserted code
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const newPos = start + insertion.length;
+      textarea.setSelectionRange(newPos, newPos);
+    });
+  };
+
   return (
-    <div className="pm-editor-toolbar">
-      {COMMANDS.map((cmd, i) => {
-        if (cmd.label === '|') {
-          return <div key={i} className="pm-editor-toolbar-divider" />;
-        }
-        return (
-          <button
-            key={i}
-            title={cmd.title}
-            className="pm-editor-toolbar-btn"
-            onMouseDown={(e) => {
-              // Prevent textarea from losing focus
-              e.preventDefault();
-              handleCommand(cmd);
-            }}
-          >
-            {cmd.label}
-          </button>
-        );
-      })}
-    </div>
+    <>
+      <div className="pm-editor-toolbar">
+        <button
+          className="pm-editor-toolbar-btn pm-ai-btn"
+          title="AI Generate PhysMark"
+          onClick={() => setShowAIDialog(true)}
+        >
+          🤖 AI
+        </button>
+        <div className="pm-editor-toolbar-divider" />
+        {COMMANDS.map((cmd, i) => {
+          if (cmd.label === '|') {
+            return <div key={i} className="pm-editor-toolbar-divider" />;
+          }
+          return (
+            <button
+              key={i}
+              title={cmd.title}
+              className="pm-editor-toolbar-btn"
+              onMouseDown={(e) => {
+                // Prevent textarea from losing focus
+                e.preventDefault();
+                handleCommand(cmd);
+              }}
+            >
+              {cmd.label}
+            </button>
+          );
+        })}
+      </div>
+      {showAIDialog && (
+        <AIGenerateDialog
+          onGenerate={handleAIGenerate}
+          onClose={() => setShowAIDialog(false)}
+        />
+      )}
+    </>
   );
 };
