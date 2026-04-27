@@ -2,19 +2,42 @@
  * PhysMarkReader — pure rendering component
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import markedKatex from 'marked-katex-extension';
 import hljs from 'highlight.js';
 import { parseDocument } from '@physmark/core';
 import type { PhysMarkReaderProps } from './types';
+import { Annotation } from './components/Annotation';
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/github.css';
 import './style.css';
 
 function createMarked() {
   const marked = new Marked();
+
+  // Annotation renderer for parsing ==text==[annotation]
+  const annotationRenderer = {
+    paragraph(text: string) {
+      // Parse annotations: ==text==[annotation]
+      let processedText = text;
+      let hasAnnotations = false;
+
+      // Create a span for annotation content replacement
+      processedText = processedText.replace(
+        /==([^=]+?)==\[([^\]]+?)\]/g,
+        (match, text, annotation) => {
+          hasAnnotations = true;
+          return `<physmark-annotation data-text="${encodeURIComponent(text)}" data-annotation="${encodeURIComponent(annotation)}"></physmark-annotation>`;
+        }
+      );
+
+      return `<p>${processedText}</p>`;
+    }
+  };
+
+  marked.use(annotationRenderer);
 
   marked.use(markedHighlight({
     emptyLangClass: 'hljs',

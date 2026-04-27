@@ -90,8 +90,12 @@ export const PhysMarkApp: React.FC<PhysMarkAppProps> = ({
 
   const handleSave = useCallback(async () => {
     if (!fsAdapter || !activeFile || content === null) return;
+    if (!fsAdapter.writeTextFile) {
+      setError('Save is not supported in this environment');
+      return;
+    }
     try {
-      await (fsAdapter as any).writeTextFile(activeFile, content);
+      await fsAdapter.writeTextFile(activeFile, content);
       setDirty(false);
     } catch (e) {
       setError(`Failed to save: ${(e as Error).message}`);
@@ -123,7 +127,7 @@ export const PhysMarkApp: React.FC<PhysMarkAppProps> = ({
           onEditModeToggle={() => setEditMode((v) => !v)}
           dirty={dirty}
           onSave={handleSave}
-          canSave={!!fsAdapter && !!activeFile}
+          canSave={!!fsAdapter && !!activeFile && !!fsAdapter.writeTextFile}
         />
         <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
           <Sidebar
@@ -144,6 +148,7 @@ export const PhysMarkApp: React.FC<PhysMarkAppProps> = ({
                 <MarkdownEditor
                   content={content}
                   onChange={handleContentChange}
+                  onSave={handleSave}
                   readerProps={{ registry, context: renderContext }}
                 />
               ) : (

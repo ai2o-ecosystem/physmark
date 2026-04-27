@@ -11,7 +11,8 @@ export class WebFileSystemAdapter implements IFileSystemAdapter {
   async openDialog(options: OpenDialogOptions): Promise<string[] | null> {
     try {
       if (options.directory) {
-        const handle = await (window as any).showDirectoryPicker({ mode: 'read' });
+        // Request readwrite so we can save files later
+        const handle = await (window as any).showDirectoryPicker({ mode: 'readwrite' });
         const path = handle.name;
         this.handles.set(path, handle);
         return [path];
@@ -34,6 +35,16 @@ export class WebFileSystemAdapter implements IFileSystemAdapter {
     }
   }
 
+  async writeTextFile(path: string, content: string): Promise<void> {
+    const handle = this.handles.get(path);
+    if (!handle || handle.kind !== 'file') {
+      throw new Error(`File not found in handle map: ${path}`);
+    }
+    const writable = await (handle as FileSystemFileHandle).createWritable();
+    await writable.write(content);
+    await writable.close();
+  }
+
   async readTextFile(path: string): Promise<string> {
     const bytes = await this.readBinaryFile(path);
     return new TextDecoder().decode(bytes);
@@ -54,7 +65,9 @@ export class WebFileSystemAdapter implements IFileSystemAdapter {
       throw new Error(`Directory not found in handle map: ${path}`);
     }
     const entries: FileEntry[] = [];
-    for await (const [name, child] of (handle as FileSystemDirectoryHandle).entries()) {
+    const dirHandle = handle as FileSystemDirectoryHandle;
+    // @ts-ignore - entries() exists at runtime but may not be in all TS versions
+    for await (const [name, child] of dirHandle.entries()) {
       const childPath = `${path}/${name}`;
       this.handles.set(childPath, child);
       entries.push({ name, path: childPath, isDirectory: child.kind === 'directory' });

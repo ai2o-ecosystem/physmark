@@ -25,5 +25,6 @@ export interface IFileSystemAdapter {
   readBinaryFile(path: string): Promise<Uint8Array>;
   readDir(path: string): Promise<FileEntry[]>;
   readDirRecursive(path: string): Promise<FileEntry[]>;
+  writeTextFile?(path: string, content: string): Promise<void>;
   watchFile?(path: string, cb: (e: WatchEvent) => void): () => void;
 }

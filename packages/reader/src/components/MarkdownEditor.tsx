@@ -6,17 +6,24 @@ import type { PhysMarkReaderProps } from '../types';
 interface MarkdownEditorProps {
   content: string;
   onChange: (value: string) => void;
+  onSave?: () => void;
   readerProps: Omit<PhysMarkReaderProps, 'content'>;
 }
 
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   content,
   onChange,
+  onSave,
   readerProps,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      onSave?.();
+      return;
+    }
     // Tab → insert 2 spaces
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -28,7 +35,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         ta.setSelectionRange(selectionStart + 2, selectionStart + 2);
       });
     }
-  }, [onChange]);
+  }, [onChange, onSave]);
 
   return (
     <div className="pm-editor-root">

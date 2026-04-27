@@ -252,6 +252,29 @@
   font-weight: 500;
 }
 
+.physmark-folder-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-size: 10px;
+  color: var(--pm-color-text-muted, #6b7280);
+  transition: transform 0.15s ease;
+}
+
+.physmark-folder-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.physmark-folder-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Main content area */
 .physmark-main {
   flex: 1;
