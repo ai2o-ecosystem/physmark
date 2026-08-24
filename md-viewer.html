@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MD Viewer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked-highlight@2.1.1/lib/index.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+  word-spacing: normal;
+}
+
+/* Landing */
+#landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 16px;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+#landing h1 {
+  font-size: 20px;
+  font-weight: 500;
+  color: #2d2a2a;
+}
+
+#landing p {
+  font-size: 14px;
+  color: #9ca3af;
+  line-height: 25px;
+}
+
+#drop-zone {
+  width: 380px;
+  height: 160px;
+  border: 2px dashed #e5e5e5;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+#drop-zone:hover, #drop-zone.dragover {
+  border-color: #000;
+  background: #fafafa;
+}
+
+#drop-zone span {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.pill-btn {
+  display: inline-block;
+  background: #000;
+  color: #fff;
+  font-family: ui-sans-serif, sans-serif;
+  padding: 10px 22px;
+  border-radius: 100px;
+  font-size: 14px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.pill-btn:hover { opacity: 0.8; }
+
+#file-input { display: none; }
+
+/* Reader */
+#reader-wrap {
+  display: none;
+  background-color: #ffffff;
+  padding-top: 24px;
+}
+
+#reader-wrap.visible { display: block; }
+</style>
+<style>
+/* Typography — matches ai_studio_code style */
+#reader {
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color: #2d2a2a;
+  line-height: 25px;
+}
+
+#reader h1, #reader h2, #reader h3, #reader h4 {
+  font-family: ui-sans-serif, sans-serif;
+  font-weight: 500;
+  color: #2d2a2a;
+  margin: 28px 0 12px;
+}
+
+#reader h1 { font-size: 22px; line-height: 32px; }
+#reader h2 { font-size: 20px; line-height: 32px; }
+#reader h3 { font-size: 17px; line-height: 28px; }
+#reader h4 { font-size: 15px; line-height: 25px; }
+
+#reader p { margin: 10px 0; }
+
+#reader a { color: #2d2a2a; font-weight: 600; text-decoration: none; }
+#reader a:hover { text-decoration: underline; }
+
+#reader strong { font-weight: 600; }
+
+#reader blockquote {
+  border-left: 3px solid #e5e5e5;
+  margin: 14px 0;
+  padding: 4px 16px;
+  color: #6b7280;
+}
+
+#reader img {
+  max-width: 100%;
+  border-radius: 10px;
+  margin: 12px 0;
+}
+
+/* Code — terminal style like ai_studio_code */
+#reader code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background-color: #f3f3f3;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 13px;
+  color: #2d2a2a;
+}
+
+#reader pre {
+  background-color: #f3f3f3;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 15px;
+  color: #2d2a2a;
+  overflow-x: auto;
+  margin: 14px 0;
+  line-height: 1.6;
+}
+
+#reader pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: 15px;
+}
+
+/* Table */
+#reader table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 14px 0;
+  font-size: 14px;
+}
+
+#reader th, #reader td {
+  border: 1px solid #f3f3f3;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+#reader th {
+  background: #f3f3f3;
+  font-weight: 600;
+}
+
+/* List */
+#reader ul, #reader ol {
+  padding-left: 1.6em;
+  margin: 10px 0;
+}
+
+#reader li { margin: 4px 0; }
+
+#reader li input[type="checkbox"] {
+  margin-right: 6px;
+}
+
+/* HR */
+#reader hr {
+  border: none;
+  border-top: 1px solid #f3f3f3;
+  margin: 24px 0;
+}
+
+/* KaTeX */
+#reader .katex-display {
+  overflow-x: auto;
+  margin: 14px 0;
+}
+</style>
+</head>
+<body>
+
+<div id="landing">
+  <h1>Markdown Viewer</h1>
+  <p>拖拽 .md 文件或点击选择</p>
+  <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+    <svg width="40" height="40" fill="none" stroke="#ccc" stroke-width="1.5" viewBox="0 0 24 24">
+      <path d="M12 16V4m0 0L8 8m4-4l4 4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+    </svg>
+    <span>拖拽 Markdown 文件到此处</span>
+    <button class="pill-btn">选择文件</button>
+  </div>
+  <input type="file" id="file-input" accept=".md,.markdown,.txt">
+</div>
+
+<div id="reader-wrap">
+  <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width:100%; max-width:640px;">
+    <tbody>
+      <tr>
+        <td style="padding: 0 24px 60px;">
+          <div id="back-row" style="margin-bottom:20px;">
+            <button class="pill-btn" onclick="showLanding()" style="font-size:13px;padding:7px 18px;">← 返回</button>
+          </div>
+          <div id="reader"></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+const { Marked } = marked;
+const markedHighlightModule = globalThis.markedHighlight || window.markedHighlight;
+
+const markedInstance = new Marked();
+
+if (markedHighlightModule) {
+  markedInstance.use(markedHighlightModule.markedHighlight({
+    emptyLangClass: 'hljs',
+    langPrefix: 'hljs language-',
+    highlight(code, lang) {
+      if (hljs.getLanguage(lang)) return hljs.highlight(code, { language: lang }).value;
+      return hljs.highlightAuto(code).value;
+    }
+  }));
+}
+
+// KaTeX math
+markedInstance.use({
+  extensions: [{
+    name: 'mathBlock',
+    level: 'block',
+    start(src) { return src.indexOf('$$'); },
+    tokenizer(src) {
+      const m = src.match(/^\$\$([\s\S]+?)\$\$/);
+      if (m) return { type: 'mathBlock', raw: m[0], text: m[1].trim() };
+    },
+    renderer(token) {
+      try { return '<div class="katex-display">' + katex.renderToString(token.text, { displayMode: true, throwOnError: false }) + '</div>'; }
+      catch { return '<pre>' + token.text + '</pre>'; }
+    }
+  }, {
+    name: 'mathInline',
+    level: 'inline',
+    start(src) { return src.indexOf('$'); },
+    tokenizer(src) {
+      const m = src.match(/^\$([^\$\n]+?)\$/);
+      if (m) return { type: 'mathInline', raw: m[0], text: m[1] };
+    },
+    renderer(token) {
+      try { return katex.renderToString(token.text, { displayMode: false, throwOnError: false }); }
+      catch { return '<code>' + token.text + '</code>'; }
+    }
+  }]
+});
+
+markedInstance.use({ gfm: true, breaks: false });
+
+function showReader(md) {
+  document.getElementById('landing').style.display = 'none';
+  const wrap = document.getElementById('reader-wrap');
+  wrap.classList.add('visible');
+  document.getElementById('reader').innerHTML = markedInstance.parse(md);
+}
+
+function showLanding() {
+  document.getElementById('landing').style.display = '';
+  document.getElementById('reader-wrap').classList.remove('visible');
+  document.getElementById('reader').innerHTML = '';
+}
+
+function handleFile(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = (e) => showReader(e.target.result);
+  r.readAsText(file);
+}
+
+document.getElementById('file-input').addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', (e) => {
+  e.preventDefault(); dz.classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f && /\.(md|markdown|txt)$/i.test(f.name)) handleFile(f);
+});
+
+document.body.addEventListener('dragover', (e) => e.preventDefault());
+document.body.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
+  if (f && /\.(md|markdown|txt)$/i.test(f.name)) handleFile(f);
+});
+
+// Support ?url= param for fetching remote md
+const params = new URLSearchParams(location.search);
+const mdUrl = params.get('url');
+if (mdUrl) {
+  fetch(mdUrl).then(r => r.text()).then(showReader).catch(e => {
+    document.getElementById('reader').textContent = 'Failed to load: ' + e.message;
+    document.getElementById('reader-wrap').classList.add('visible');
+    document.getElementById('landing').style.display = 'none';
+  });
+}
+</script>
+</body>
+</html>

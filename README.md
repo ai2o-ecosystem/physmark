@@ -1,28 +1,39 @@
 # PhysMark
 
-**Mathematical Intuition for Polymath Engineers** - Interactive physics simulations embedded in Markdown.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61dafb)](https://react.dev/)
 
-## What is PhysMark?
+**Interactive Physics Simulations in Markdown** — Embed 3D physics, smooth animations, and mathematical visualizations directly in your documentation.
 
-PhysMark is a markup language and rendering system that allows you to embed interactive 3D physics simulations directly in Markdown documents. Perfect for educational content, technical documentation, and interactive textbooks.
+Part of [Mathematical Intuition for Polymath Engineers](https://github.com/ai2o-ecosystem/MathematicaL-Intuition-for-Polymath-Engineers) — a new kind of interactive textbook.
 
-## Features
+## ✨ Features
 
-- 📝 **Markdown-native** - Write physics simulations in JSON blocks
-- 🎮 **Interactive** - Real-time 3D physics powered by Rapier.js
-- 🔌 **Plugin-based** - Extensible architecture for custom physics engines
-- 🎨 **Beautiful** - Clean, modern UI inspired by best design practices
-- ⚡ **Fast** - Optimized rendering with React Three Fiber
+- 📝 **Markdown-Native** — Write simulations in simple JSON code blocks
+- 🎮 **Interactive 3D Physics** — Real-time rigid body dynamics powered by Rapier.js
+- 🎨 **Smooth 2D Animations** — Tween timelines with easing functions
+- 🛤️ **Path Animations** — Objects following SVG paths
+- 🔌 **Plugin Architecture** — Extensible for custom physics engines
+- ⚡ **High Performance** — Optimized rendering with React Three Fiber
+- 🎯 **Three Deployment Modes** — Web app, desktop app (Tauri), or VS Code extension
 
-## Quick Start
+## 🚀 Quick Start
 
-### Installation
+### Web Viewer (Standalone HTML)
+
+The simplest way to view PhysMark documents:
+
+```bash
+# Open md-viewer.html in your browser and drag-drop any .md file
+open md-viewer.html
+```
+
+### React Integration
 
 ```bash
 pnpm install @physmark/reader @physmark/plugin-rapier
 ```
-
-### Usage
 
 ```tsx
 import { PhysMarkReader } from '@physmark/reader';
@@ -37,102 +48,218 @@ const App = () => (
 );
 ```
 
-### Markdown Syntax
+## 📝 Syntax Examples
+
+### Type 1: 3D Physics Simulation
 
 ````markdown
-# My Physics Lesson
-
 ```physmark
-{
-  "plugin": "rapier",
-  "config": {
-    "gravity": [0, -9.81, 0],
-    "bodies": [
-      {
-        "type": "dynamic",
-        "shape": "sphere",
-        "position": [0, 5, 0],
-        "mass": 2.0,
-        "color": "#ef4444"
-      }
-    ]
-  }
-}
+type: physics
+gravity: [0, -9.81, 0]
+duration: 8
+loop: true
+bodies:
+  - type: dynamic
+    shape: sphere
+    position: [0, 8, 0]
+    size: 0.5
+    color: "#ef4444"
+    restitution: 0.8
+  - type: static
+    shape: box
+    position: [0, -0.5, 0]
+    size: [10, 1, 10]
+    color: "#10b981"
 ```
 ````
 
-## Plugin Syntax: Rapier
+### Type 2: 2D Tween Animation
 
-### Configuration Schema
+````markdown
+```physmark
+type: tween
+width: 600
+height: 200
+loop: true
+targets:
+  - id: ball
+    shape: circle
+    radius: 24
+    color: "#ef4444"
+    x: 40
+    y: 100
+timeline:
+  - target: ball
+    x: 560
+    duration: 1200
+    easing: easeInOutQuad
+```
+````
 
-```typescript
-{
-  plugin: "rapier",
-  config: {
-    gravity?: [x, y, z],           // Default: [0, -9.81, 0]
-    duration?: number,              // Simulation time in seconds
-    camera?: {
-      position?: [x, y, z],
-      lookAt?: [x, y, z]
-    },
-    bodies: [
-      {
-        type?: "dynamic" | "static" | "kinematic",  // Default: dynamic
-        shape: "sphere" | "box" | "capsule",
-        position: [x, y, z],
-        rotation?: [x, y, z, w],    // Quaternion
-        size?: number | [x, y, z],  // Depends on shape
-        mass?: number,
-        restitution?: number,       // Bounciness (0-1)
-        friction?: number,
-        color?: string,             // CSS color
-        velocity?: [x, y, z],
-        angularVelocity?: [x, y, z]
-      }
-    ]
-  }
-}
+### Type 3: SVG Path Animation
+
+````markdown
+```physmark
+type: path
+width: 600
+height: 300
+path: "M 50,150 C 150,50 300,250 500,150"
+duration: 2000
+loop: true
+objects:
+  - shape: circle
+    radius: 16
+    color: "#6366f1"
+```
+````
+
+## 🏗️ Project Structure
+
+```
+physmark/
+├── packages/
+│   ├── core/              # Core types and abstractions
+│   ├── reader/            # Markdown parser & React renderer
+│   ├── plugin-rapier/     # 3D physics plugin (Rapier.js)
+│   ├── theme/             # UI theme system
+│   └── fs-adapter/        # File system utilities
+├── apps/
+│   ├── web/               # Web application (Vite + React)
+│   ├── desktop/           # Desktop app (Tauri)
+│   └── vscode-extension/  # VS Code extension
+├── example/
+│   ├── demo.md            # Full feature demonstration
+│   └── test-features.md   # Testing playground
+└── md-viewer.html         # Standalone HTML viewer (no build required)
 ```
 
-### Body Types
-
-- **dynamic**: Affected by forces and gravity
-- **static**: Fixed in place, never moves
-- **kinematic**: Moves programmatically, not affected by forces
-
-### Shapes
-
-- **sphere**: `size` = radius
-- **box**: `size` = [width, height, depth]
-- **capsule**: `size` = [radius, height]
-
-## Development
+## 🛠️ Development
 
 ```bash
 # Install dependencies
 pnpm install
 
-# Run example
+# Run web app
 pnpm dev
 
-# Build packages
+# Run desktop app
+pnpm dev:desktop
+
+# Build all packages
 pnpm build
+
+# Build specific target
+pnpm build:web
+pnpm build:desktop
+pnpm build:vscode
 ```
 
-## Project Structure
+## 📦 Packages
 
+### Core Packages
+
+- **@physmark/core** — Core types, interfaces, and plugin system
+- **@physmark/reader** — Markdown parser and React renderer with KaTeX and syntax highlighting
+- **@physmark/theme** — Design system and UI components
+
+### Physics Engines
+
+- **@physmark/plugin-rapier** — 3D rigid body physics (Rapier.js + React Three Fiber)
+
+### Utilities
+
+- **@physmark/fs-adapter** — File system adapters for different platforms
+
+## 🎯 Use Cases
+
+- 📚 **Interactive Textbooks** — Embed live physics demonstrations
+- 📖 **Technical Documentation** — Visualize algorithms and data structures
+- 🎓 **Educational Content** — Make STEM concepts tangible
+- 🔬 **Research Papers** — Interactive figures and simulations
+- 💡 **Engineering Notebooks** — Document experiments with live demos
+
+## 🎨 Configuration Schema
+
+### Physics Bodies
+
+```typescript
+{
+  type?: "dynamic" | "static" | "kinematic"  // Default: dynamic
+  shape: "sphere" | "box" | "capsule"
+  position: [x, y, z]
+  rotation?: [x, y, z, w]                    // Quaternion
+  size?: number | [x, y, z]                  // Shape-dependent
+  mass?: number
+  restitution?: number                       // Bounciness (0-1)
+  friction?: number
+  color?: string                             // CSS color
+  velocity?: [x, y, z]
+  angularVelocity?: [x, y, z]
+}
 ```
-physmark/
-├── packages/
-│   ├── reader/          # Core Markdown parser & renderer
-│   └── plugin-rapier/   # Rapier.js physics plugin
-└── example/             # Demo application
+
+### Tween Timeline
+
+```typescript
+{
+  target: string                             // Target object ID
+  duration: number                           // Milliseconds
+  easing?: string                            // Easing function name
+  delay?: number                             // Start delay in ms
+  x?: number
+  y?: number
+  rotation?: number                          // Radians
+  opacity?: number
+}
 ```
 
-## License
+### Available Easing Functions
 
-MIT
+- Linear: `linear`
+- Quad: `easeInQuad`, `easeOutQuad`, `easeInOutQuad`
+- Cubic: `easeInCubic`, `easeOutCubic`, `easeInOutCubic`
+- Sine: `easeInSine`, `easeOutSine`, `easeInOutSine`
+- Bounce: `easeOutBounce`, `easeInBounce`, `easeInOutBounce`
+- Elastic: `easeOutElastic`, `easeInElastic`, `easeInOutElastic`
 
-## Contributing
+## 🌐 Browser Support
 
-Contributions welcome! This is the foundation for "Mathematical Intuition for Polymath Engineers" - a new kind of interactive textbook.
+- Chrome/Edge 90+
+- Firefox 88+
+- Safari 14+
+
+## 🤝 Contributing
+
+Contributions are welcome! This project is the foundation for a new generation of interactive technical education.
+
+```bash
+# Fork and clone
+git clone https://github.com/ai2o-ecosystem/physmark.git
+cd physmark
+
+# Create feature branch
+git checkout -b feature/amazing-feature
+
+# Make changes and test
+pnpm install
+pnpm dev
+
+# Commit and push
+git commit -m "Add amazing feature"
+git push origin feature/amazing-feature
+```
+
+## 📄 License
+
+MIT © 2024
+
+## 🔗 Links
+
+- 📖 [Full Documentation](./docs/)
+- 🎮 [Live Demo](./example/demo.md)
+- 📚 [Mathematical Intuition for Polymath Engineers](https://github.com/ai2o-ecosystem/MathematicaL-Intuition-for-Polymath-Engineers)
+- 🐛 [Report Issues](https://github.com/ai2o-ecosystem/physmark/issues)
+
+---
+
+Built with ❤️ for engineers who think in motion
