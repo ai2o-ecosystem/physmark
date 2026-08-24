@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "pnpm --filter @physmark/web dev",
-    "dev:desktop": "pnpm --filter @physmark/desktop tauri dev",
-    "build": "pnpm -r build",
-    "build:web": "pnpm --filter @physmark/web build",
-    "build:desktop": "pnpm --filter @physmark/desktop build",
-    "build:vscode": "pnpm --filter physmark-vscode build"
+    "dev:desktop": "pnpm --filter @physmark/desktop dev",
+    "build": "pnpm -r --filter='./packages/*' build",
+    "build:web": "pnpm build && pnpm --filter @physmark/web build",
+    "build:desktop": "pnpm build && pnpm --filter @physmark/desktop tauri build",
+    "build:vscode": "pnpm build && pnpm --filter physmark-vscode build"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
