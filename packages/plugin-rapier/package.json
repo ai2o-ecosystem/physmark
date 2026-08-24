@@ -1,6 +1,7 @@
 {
   "name": "@physmark/plugin-rapier",
   "version": "0.1.0",
+  "description": "3D physics plugin for PhysMark using Rapier.js and React Three Fiber",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -10,6 +11,30 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "physmark",
+    "physics",
+    "3d",
+    "rapier",
+    "three.js",
+    "react-three-fiber",
+    "simulation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai2o-ecosystem/physmark.git",
+    "directory": "packages/plugin-rapier"
+  },
+  "homepage": "https://github.com/ai2o-ecosystem/physmark#readme",
+  "bugs": {
+    "url": "https://github.com/ai2o-ecosystem/physmark/issues"
+  },
+  "license": "MIT",
+  "author": "AI2O Ecosystem",
   "scripts": {
     "build": "tsc && vite build"
   },

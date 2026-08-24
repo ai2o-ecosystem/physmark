@@ -1,6 +1,7 @@
 {
   "name": "@physmark/core",
   "version": "0.1.0",
+  "description": "Core types and plugin system for PhysMark - Interactive physics simulations in Markdown",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -11,9 +12,33 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc"
   },
+  "keywords": [
+    "physmark",
+    "markdown",
+    "physics",
+    "animation",
+    "visualization",
+    "education",
+    "interactive"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai2o-ecosystem/physmark.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/ai2o-ecosystem/physmark#readme",
+  "bugs": {
+    "url": "https://github.com/ai2o-ecosystem/physmark/issues"
+  },
+  "license": "MIT",
+  "author": "AI2O Ecosystem",
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
